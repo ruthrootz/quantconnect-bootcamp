@@ -1,4 +1,4 @@
-class HipsterAsparagusJackal(QCAlgorithm):
+class BootcampAlgorithm(QCAlgorithm):
 
     def Initialize(self):
         self.SetStartDate(2020, 10, 28)  # Set Start Date
