@@ -23,6 +23,5 @@ class OpeningRangeBreakout(QCAlgorithm):
             self.openingBar = bar
 
     def ClosePositions(self):
-        #2. Set self.openingBar to None, and liquidate TSLA
         self.openingBar = None
         self.Liquidate("TSLA")
