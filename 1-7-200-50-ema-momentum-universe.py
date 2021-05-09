@@ -19,12 +19,19 @@ class EMAMomentumUniverse(QCAlgorithm):
             self.SetHoldings(security.Symbol, 0.10)
 
 #1. Create a class SelectionData
+class SelectionData:
     #2. Create a constructor that takes self 
     def __init__(self):
         #2. Save the fast and slow ExponentialMovingAverage
-        self.slow = ...
-        self.fast = ...
+        self.slow = ExponentialMovingAverage(200)
+        self.fast = ExponentialMovingAverage(50)
     
     #3. Check if our indicators are ready
+    def is_ready(self):
+        return self.slow.IsReady and self.fast.IsReady
     
     #4. Use the "indicator.Update" method to update the time and price of both indicators
+    def update(self, time, price):
+        self.slow.Update(time, price)
+        self.fast.Update(time, price)
+        
