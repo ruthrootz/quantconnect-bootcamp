@@ -1,15 +1,21 @@
 from datetime import timedelta
-class MOMAlphaModel(AlphaModel): 
+
+
+class MOMAlphaModel(AlphaModel):
+    
     def __init__(self):
         self.mom = []
+        
     def OnSecuritiesChanged(self, algorithm, changes):
         for security in changes.AddedSecurities:
             symbol = security.Symbol
             self.mom.append({"symbol":symbol, "indicator":algorithm.MOM(symbol, 14, Resolution.Daily)})
+            
     def Update(self, algorithm, data):
         ordered = sorted(self.mom, key=lambda kv: kv["indicator"].Current.Value, reverse=True)
         return Insight.Group([Insight.Price(ordered[0]['symbol'], timedelta(1), InsightDirection.Up), Insight.Price(ordered[1]['symbol'], timedelta(1), InsightDirection.Flat) ])
- 
+
+
 class FrameworkAlgorithm(QCAlgorithm):
     
     def Initialize(self):
@@ -22,6 +28,5 @@ class FrameworkAlgorithm(QCAlgorithm):
         self.SetAlpha(MOMAlphaModel())
         self.SetPortfolioConstruction(EqualWeightingPortfolioConstructionModel())
         self.SetRiskManagement(MaximumDrawdownPercentPerSecurity(0.02))
+        self.SetExecution(ImmediateExecutionModel())
         
-        #1. Set the Execution Model to an Immediate Execution Model
-        self.SetExecution( .... )
