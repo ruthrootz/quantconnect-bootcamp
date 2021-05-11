@@ -1,27 +1,26 @@
-from datetime import timedelta
-class MOMAlphaModel(AlphaModel): 
-    def __init__(self):
-        self.mom = []
-    def OnSecuritiesChanged(self, algorithm, changes):
-        for security in changes.AddedSecurities:
-            symbol = security.Symbol
-            self.mom.append({"symbol":symbol, "indicator":algorithm.MOM(symbol, 14, Resolution.Daily)})
-    def Update(self, algorithm, data):
-        ordered = sorted(self.mom, key=lambda kv: kv["indicator"].Current.Value, reverse=True)
-        return Insight.Group([Insight.Price(ordered[0]['symbol'], timedelta(1), InsightDirection.Up), Insight.Price(ordered[1]['symbol'], timedelta(1), InsightDirection.Flat) ])
- 
-         
-class FrameworkAlgorithm(QCAlgorithm):
+class LiquidUniverseSelection(QCAlgorithm):
+    
+    filteredByPrice = None
+    
     def Initialize(self):
-        self.SetStartDate(2013, 10, 1)  
-        self.SetEndDate(2013, 12, 1)   
-        self.SetCash(100000)           
-        symbols = [Symbol.Create("SPY", SecurityType.Equity, Market.USA),  Symbol.Create("BND", SecurityType.Equity, Market.USA)]
+        self.SetStartDate(2019, 1, 11)  
+        self.SetEndDate(2019, 7, 1) 
+        self.SetCash(100000)  
+        self.AddUniverse(self.CoarseSelectionFilter)
         self.UniverseSettings.Resolution = Resolution.Daily
-        self.SetUniverseSelection(ManualUniverseSelectionModel(symbols))
-        self.SetAlpha(MOMAlphaModel())
-        self.SetPortfolioConstruction(EqualWeightingPortfolioConstructionModel())
+        self.UniverseSettings.Leverage = 2
+       
+    def CoarseSelectionFilter(self, coarse):
+        sortedByDollarVolume = sorted(coarse, key=lambda c: c.DollarVolume, reverse=True)
+        filteredByPrice = [c.Symbol for c in sortedByDollarVolume if c.Price > 10]
+        return filteredByPrice[:10] 
 
-        #1. Set the Risk Management handler to use a 2% maximum drawdown
-        
-        self.SetExecution(NullExecutionModel())
+    def OnSecuritiesChanged(self, changes):
+        self.changes = changes
+        self.Log(f"OnSecuritiesChanged({self.Time}):: {changes}")
+        for security in self.changes.RemovedSecurities:
+            if security.Invested:
+                self.Liquidate(security.Symbol)
+        for security in self.changes.AddedSecurities:
+            self.SetHoldings(security.Symbol, 0.18)
+            
