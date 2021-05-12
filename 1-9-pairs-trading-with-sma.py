@@ -8,34 +8,51 @@ class SMAPairsTrading(QCAlgorithm):
         self.SetCash(100000)
         
         symbols = [Symbol.Create("PEP", SecurityType.Equity, Market.USA), Symbol.Create("KO", SecurityType.Equity, Market.USA)]
-        self.AddUniverseSelection(ManualUniverseSelectionModel(symbols))
         self.UniverseSettings.Resolution = Resolution.Hour
         self.UniverseSettings.DataNormalizationMode = DataNormalizationMode.Raw
+        self.AddUniverseSelection(ManualUniverseSelectionModel(symbols))
         self.AddAlpha(PairsTradingAlphaModel())
         self.SetPortfolioConstruction(EqualWeightingPortfolioConstructionModel())
-        self.SetExecution(ImmediateExecutionModel()) 
-
+        self.SetExecution(ImmediateExecutionModel())
+        
+    def OnEndOfDay(self, symbol): # to Log() your positions at the close of each trading day.
+        self.Log("Taking a position of " + str(self.Portfolio[symbol].Quantity) + " units of symbol " + str(symbol))
+    
+    
 class PairsTradingAlphaModel(AlphaModel):
 
     def __init__(self):
         self.pair = [ ]
-        #1. Create a 500-period Simple Moving Average Indicator monitoring the spread SMA 
         self.spreadMean = SimpleMovingAverage(500)
-        
-        #2. Create a 500-period Standard Deviation Indicator monitoring the spread Std 
         self.spreadStd = StandardDeviation(500)
+        #1. Set self.period to a 2 hour timedelta
+        self.period = timedelta(hours=2)
         
     def Update(self, algorithm, data):
 
         spread = self.pair[1].Price - self.pair[0].Price
-        #3. Update the spreadMean indicator with the spread
         self.spreadMean.Update(algorithm.Time, spread)
-        #4. Update the spreadStd indicator with the spread
         self.spreadStd.Update(algorithm.Time, spread)
-        #5. Save our upper threshold and lower threshold
+        
         upperthreshold = self.spreadMean.Current.Value + self.spreadStd.Current.Value
         lowerthreshold = self.spreadMean.Current.Value - self.spreadStd.Current.Value
         
+        #2. Emit an Insight.Group() if the spread is greater than the upperthreshold
+        if spread > upperthreshold:
+            return Insight.Group(
+                [
+                    Insight.Price(self.pair[0].Symbol, self.period, InsightDirection.Up),
+                    Insight.Price(self.pair[1].Symbol, self.period, InsightDirection.Down)
+                ])
+        
+        #2. Emit an Insight.Group() if the spread is less than the lowerthreshold
+        if spread < lowerthreshold:
+            return Insight.Group(
+                [
+                    Insight.Price(self.pair[0].Symbol, self.period, InsightDirection.Down),
+                    Insight.Price(self.pair[1].Symbol, self.period, InsightDirection.Up)
+                ])
+        # If the spread is not greater than the upper or lower threshold, do not return Insights
         return []
     
     def OnSecuritiesChanged(self, algorithm, changes):
