@@ -20,20 +20,21 @@ class PairsTradingAlphaModel(AlphaModel):
     def __init__(self):
         self.pair = [ ]
         #1. Create a 500-period Simple Moving Average Indicator monitoring the spread SMA 
-        self.spreadMean = ...
+        self.spreadMean = SimpleMovingAverage(500)
         
         #2. Create a 500-period Standard Deviation Indicator monitoring the spread Std 
-        self.spreadStd = ...
+        self.spreadStd = StandardDeviation(500)
         
     def Update(self, algorithm, data):
 
         spread = self.pair[1].Price - self.pair[0].Price
         #3. Update the spreadMean indicator with the spread
+        self.spreadMean.Update(algorithm.Time, spread)
         #4. Update the spreadStd indicator with the spread
-        
+        self.spreadStd.Update(algorithm.Time, spread)
         #5. Save our upper threshold and lower threshold
-        upperthreshold = ...
-        lowerthreshold = ...
+        upperthreshold = self.spreadMean.Current.Value + self.spreadStd.Current.Value
+        lowerthreshold = self.spreadMean.Current.Value - self.spreadStd.Current.Value
         
         return []
     
