@@ -54,7 +54,10 @@ class PairsTradingAlphaModel(AlphaModel):
         self.pair = [x for x in changes.AddedSecurities]
         
         #1. Call for 500 bars of history data for each symbol in the pair and save to the variable history
-        history = ...
+        history = algorithm.History([x.Symbol for x in self.pair], 500)
         #2. Unstack the Pandas data frame to reduce it to the history close price
-        history = ...
+        history = history.close.unstack(level=0)
         #3. Iterate through the history tuple and update the mean and standard deviation with historical data
+        for tuple in history.itertuples():
+            self.spreadMean.Update(tuple[0], tuple[2]-tuple[1])
+            self.spreadStd.Update(tuple[0], tuple[2]-tuple[1])
