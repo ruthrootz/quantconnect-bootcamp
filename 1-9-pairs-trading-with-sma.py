@@ -10,26 +10,32 @@ class SMAPairsTrading(QCAlgorithm):
         symbols = [Symbol.Create("PEP", SecurityType.Equity, Market.USA), Symbol.Create("KO", SecurityType.Equity, Market.USA)]
         self.AddUniverseSelection(ManualUniverseSelectionModel(symbols))
         self.UniverseSettings.Resolution = Resolution.Hour
-        
-        #1. Create an instance of the PairsTradingAlphamodel()
+        self.UniverseSettings.DataNormalizationMode = DataNormalizationMode.Raw
         self.AddAlpha(PairsTradingAlphaModel())
-        
         self.SetPortfolioConstruction(EqualWeightingPortfolioConstructionModel())
-        self.SetExecution(ImmediateExecutionModel())
-         
-class PairsTradingAlphaModel(AlphaModel): 
+        self.SetExecution(ImmediateExecutionModel()) 
+
+class PairsTradingAlphaModel(AlphaModel):
 
     def __init__(self):
-        #2. Initialize an empty list self.pair = [ ]
-        self.pair = []
+        self.pair = [ ]
+        #1. Create a 500-period Simple Moving Average Indicator monitoring the spread SMA 
+        self.spreadMean = ...
         
-    def Update(self, algorithm, data): 
+        #2. Create a 500-period Standard Deviation Indicator monitoring the spread Std 
+        self.spreadStd = ...
         
-        #3. Set the price difference calculation to spread.
+    def Update(self, algorithm, data):
+
         spread = self.pair[1].Price - self.pair[0].Price
+        #3. Update the spreadMean indicator with the spread
+        #4. Update the spreadStd indicator with the spread
+        
+        #5. Save our upper threshold and lower threshold
+        upperthreshold = ...
+        lowerthreshold = ...
+        
         return []
     
     def OnSecuritiesChanged(self, algorithm, changes):
-        
-        #4. Set self.pair to the changes.AddedSecurities changes
-        self.pair = [s for s in changes.AddedSecurities]
+        self.pair = [x for x in changes.AddedSecurities]
