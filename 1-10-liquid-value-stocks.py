@@ -29,7 +29,7 @@ class LiquidValueUniverseSelectionModel(FundamentalUniverseSelectionModel):
         #2. Update self.lastMonth with current month to make sure only process once per month
         self.lastMonth = algorithm.Time.month
         #3. Sort symbols by dollar volume and if they have fundamental data, in descending order
-        sortedByDollarVolume = sorted([s for s in coarse if s.HasFundementalData],
+        sortedByDollarVolume = sorted([s for s in coarse if s.HasFundamentalData],
         key=lambda s: s.DollarVolume, reverse=True)
         
         #4. Return the top 100 Symbols by Dollar Volume
