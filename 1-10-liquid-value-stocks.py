@@ -5,22 +5,24 @@ from Selection.FundamentalUniverseSelectionModel import FundamentalUniverseSelec
 class LiquidValueStocks(QCAlgorithm):
 
     def Initialize(self):
-        self.SetStartDate(2016, 10, 1)
-        self.SetEndDate(2017, 10, 1)
+        self.SetStartDate(2017, 5, 15)
+        self.SetEndDate(2017, 7, 15)
         self.SetCash(100000)
-        self.universe = None
         self.UniverseSettings.Resolution = Resolution.Hour
         self.AddUniverseSelection(LiquidValueUniverseSelectionModel())
-        self.AddAlpha(NullAlphaModel())
+        
+        #1. Create and instance of the LongShortEYAlphaModel
+        self.AddAlpha(LongShortEYAlphaModel())
+        
         self.SetPortfolioConstruction(EqualWeightingPortfolioConstructionModel())
         self.SetExecution(ImmediateExecutionModel())
-    
+
 class LiquidValueUniverseSelectionModel(FundamentalUniverseSelectionModel):
     
     def __init__(self):
-        self.lastMonth = -1 
         super().__init__(True, None, None)
-    
+        self.lastMonth = -1 
+        
     def SelectCoarse(self, algorithm, coarse):
         if self.lastMonth == algorithm.Time.month:
             return Universe.Unchanged
@@ -32,12 +34,26 @@ class LiquidValueUniverseSelectionModel(FundamentalUniverseSelectionModel):
         return [x.Symbol for x in sortedByDollarVolume[:100]]
 
     def SelectFine(self, algorithm, fine):
-        #1. Sort yields per share
-        sortedByYields = sorted(fine, key=lambda s: s.ValuationRatios.EarningYield, reverse=True) 
+        sortedByYields = sorted(fine, key=lambda f: f.ValuationRatios.EarningYield, reverse=True)
+        universe = sortedByYields[:10] + sortedByYields[-10:]
+        return [f.Symbol for f in universe]
+
+# Define the LongShortAlphaModel class  
+class LongShortEYAlphaModel(AlphaModel):
+
+    def __init__(self):
+        self.lastMonth = -1
+
+    def Update(self, algorithm, data):
+        insights = []
         
-        #2. Take top 10 most profitable stocks -- and bottom 10 least profitable stocks
-        # Save to the variable self.universe
-        self.universe = sortedByYields[:10] + sortedByYields[-10:]
-        
-        #3. Return the symbol objects by iterating through self.universe with list comprehension
-        return [f.Symbol for f in self.universe]
+        #2. If else statement to emit signals once a month 
+        if self.lastMonth == algorithm.Time.month:
+            return insights
+        self.lastMonth = algorithm.Time.month
+        #3. For loop to emit insights with insight directions 
+        # based on whether earnings yield is greater or less than zero once a month
+        for security in algorithm.ActiveSecurities.Values:
+            direction = 1 if security.Fundamentals.ValuationRatios.EarningYield > 0 else -1 
+            insights.append(Insight.Price(security.Symbol, timedelta(28), direction)) 
+        return insights
