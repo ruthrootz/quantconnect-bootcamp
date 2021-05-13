@@ -26,8 +26,8 @@ class LiquidValueUniverseSelectionModel(FundamentalUniverseSelectionModel):
     
     #2. Add an empty SelectCoarse() method with its parameters
     def SelectCoarse(self, algorithm, coarse):
-        pass
+        return Universe.Unchanged
     
     #2. Add an empty SelectFine() method with is parameters
     def SelectFine(self, algorithm, fine):
-        pass
+        return Universe.Unchanged
