@@ -12,6 +12,7 @@ class LiquidValueStocks(QCAlgorithm):
         
         #1. Create an instance of our LiquidValueUniverseSelectionModel and set to hourly resolution
         self.AddUniverseSelection(LiquidValueUniverseSelectionModel())
+        self.UniverseSettings.Resolution = Resolution.Hour
         
         self.SetPortfolioConstruction(EqualWeightingPortfolioConstructionModel())
         self.SetExecution(ImmediateExecutionModel())
