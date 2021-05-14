@@ -18,10 +18,14 @@ class TiingoNewsSentimentAlgorithm(QCAlgorithm):
         self.SetRiskManagement(NullRiskManagementModel())
         
 # 4. Create a NewsSentimentAlphaModel class with Update() and OnSecuritiesChanged() methods
-class NewsSentimentAlphaModel(QCAlgorithm):
+class NewsSentimentAlphaModel():
 
-    def Update(self, algorithm):
+    def __init__(self):
         pass
     
-    def OnSecuritiesChanged(self, algorithm):
+    def Update(self, algorithm, data):
+        insights = []
+        return insights
+    
+    def OnSecuritiesChanged(self, algorithm, changes):
         pass
