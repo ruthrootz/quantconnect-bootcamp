@@ -15,18 +15,16 @@ class TiingoNewsSentimentAlgorithm(QCAlgorithm):
         self.SetExecution(ImmediateExecutionModel()) 
         self.SetRiskManagement(NullRiskManagementModel())
 
-#1. Create the NewsData() class with properties self.Symbol and self.Window.
 class NewsData():
     def __init__(self, symbol):
         self.Symbol = symbol
-        self.Window = RollingWindow[float](100)
-
-
+        self.Window = RollingWindow[float](100)  
+        
 class NewsSentimentAlphaModel(AlphaModel):
     
     def __init__(self): 
-        self.newsData = {} 
-        
+        self.newsData = {}
+
         self.wordScores = {
             "bad": -0.5, "good": 0.5, "negative": -0.5, 
             "great": 0.5, "growth": 0.5, "fail": -0.5, 
@@ -40,7 +38,7 @@ class NewsSentimentAlphaModel(AlphaModel):
             "unproductive": -0.5, "poor": -0.5, "wrong": -0.5,
             "worthwhile": 0.5, "lucrative": 0.5, "solid": 0.5
         } 
-    
+                
     def Update(self, algorithm, data):
 
         insights = []
@@ -51,18 +49,25 @@ class NewsSentimentAlphaModel(AlphaModel):
             score = sum([self.wordScores[word] for word in words
                 if word in self.wordScores])
             
+            #1. Get the underlying symbol and save to the variable symbol
+            symbol = news.Symbol.Underlying
+            
+            #2. Add scores to the rolling window associated with its newsData symbol
+            
+            #3. Sum the rolling window scores, save to sentiment
+            # If sentiment aggregate score for the time period is greater than 5, emit an up insight
+            sentiment = ...
+           
         return insights
-        
+    
     def OnSecuritiesChanged(self, algorithm, changes):
 
         for security in changes.AddedSecurities:
             symbol = security.Symbol
             newsAsset = algorithm.AddData(TiingoNews, symbol)
-            # 2. Create a new instance of the NewsData() and store in self.newsData[symbol]
-            self.newsData[symbol] = NewsData(symbol)
-        
-        # 3. Remove news data once assets are removed from our universe
+            self.newsData[symbol] = NewsData(newsAsset.Symbol)
+
         for security in changes.RemovedSecurities:
-            newsData = self.newsData.pop(secuirty.Symbol, None)
+            newsData = self.newsData.pop(security.Symbol, None)
             if newsData is not None:
-                algorithm.RemoveSecurity(security)
+                algorithm.RemoveSecurity(newsData.Symbol)
