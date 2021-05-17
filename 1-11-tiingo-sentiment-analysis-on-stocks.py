@@ -14,13 +14,19 @@ class TiingoNewsSentimentAlgorithm(QCAlgorithm):
         self.SetPortfolioConstruction(EqualWeightingPortfolioConstructionModel()) 
         self.SetExecution(ImmediateExecutionModel()) 
         self.SetRiskManagement(NullRiskManagementModel())
-        
+
+#1. Create the NewsData() class with properties self.Symbol and self.Window.
+class NewsData():
+    def __init__(self, symbol):
+        self.Symbol = symbol
+        self.Window = RollingWindow[float](100)
+
+
 class NewsSentimentAlphaModel(AlphaModel):
     
-    def __init__(self):
+    def __init__(self): 
         self.newsData = {} 
         
-        # Assign polarity scores to words
         self.wordScores = {
             "bad": -0.5, "good": 0.5, "negative": -0.5, 
             "great": 0.5, "growth": 0.5, "fail": -0.5, 
@@ -34,25 +40,29 @@ class NewsSentimentAlphaModel(AlphaModel):
             "unproductive": -0.5, "poor": -0.5, "wrong": -0.5,
             "worthwhile": 0.5, "lucrative": 0.5, "solid": 0.5
         } 
-            
+    
     def Update(self, algorithm, data):
 
         insights = []
-        # 2. Access TiingoNews and save to the variable news
-        news = data.Get(TiingoNews)
-        
+        news = data.Get(TiingoNews) 
+
         for article in news.Values:
-            # 3. Iterate through the article descriptions and save to the variable words
-            # convert text to lowercase, and split the descriptions into a list of words
             words = article.Description.lower().split(" ")
-            # 4. Assign a self.wordScore to the word if the word exists 
-            # in self.wordScores and save to the variable self.score 
-            self.score = sum([self.wordScores[word] for word in words if word in self.wordScores])
+            score = sum([self.wordScores[word] for word in words
+                if word in self.wordScores])
+            
         return insights
-    
+        
     def OnSecuritiesChanged(self, algorithm, changes):
 
         for security in changes.AddedSecurities:
-            # 1. When new assets are added to the universe
-            # request news data for the assets and save to variable newsAsset
-            newsAsset = algorithm.AddData(TiingoNews, security.Symbol)
+            symbol = security.Symbol
+            newsAsset = algorithm.AddData(TiingoNews, symbol)
+            # 2. Create a new instance of the NewsData() and store in self.newsData[symbol]
+            self.newsData[symbol] = NewsData(symbol)
+        
+        # 3. Remove news data once assets are removed from our universe
+        for security in changes.RemovedSecurities:
+            newsData = self.newsData.pop(secuirty.Symbol, None)
+            if newsData is not None:
+                algorithm.RemoveSecurity(security)
