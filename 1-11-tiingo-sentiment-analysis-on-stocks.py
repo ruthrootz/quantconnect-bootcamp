@@ -2,6 +2,7 @@ from QuantConnect.Data.Custom.Tiingo import *
 from datetime import datetime, timedelta
 import numpy as np
 
+
 class TiingoNewsSentimentAlgorithm(QCAlgorithm):
 
     def Initialize(self):
@@ -15,16 +16,18 @@ class TiingoNewsSentimentAlgorithm(QCAlgorithm):
         self.SetExecution(ImmediateExecutionModel()) 
         self.SetRiskManagement(NullRiskManagementModel())
 
+        
 class NewsData():
+    
     def __init__(self, symbol):
         self.Symbol = symbol
         self.Window = RollingWindow[float](100)  
+        
         
 class NewsSentimentAlphaModel(AlphaModel):
     
     def __init__(self): 
         self.newsData = {}
-
         self.wordScores = {
             "bad": -0.5, "good": 0.5, "negative": -0.5, 
             "great": 0.5, "growth": 0.5, "fail": -0.5, 
@@ -40,37 +43,26 @@ class NewsSentimentAlphaModel(AlphaModel):
         } 
                 
     def Update(self, algorithm, data):
-
         insights = []
-        news = data.Get(TiingoNews) 
-
+        news = data.Get(TiingoNews)
         for article in news.Values:
             words = article.Description.lower().split(" ")
             score = sum([self.wordScores[word] for word in words
                 if word in self.wordScores])
-            
-            #1. Get the underlying symbol and save to the variable symbol
-            symbol = self.Symbol.Underlying
-            
-            #2. Add scores to the rolling window associated with its newsData symbol
-            self.newsData[symbol].Window.Add(data)
-            
-            #3. Sum the rolling window scores, save to sentiment
-            # If sentiment aggregate score for the time period is greater than 5, emit an up insight
-            sentiment = sum(Window)
+            symbol = article.Symbol.Underlying
+            self.newsData[symbol].Window.Add(score)
+            sentiment = sum(self.newsData[symbol].Window)
             if sentiment > 5:
                 insights.append(Insight.Price(symbol, timedelta(1), InsightDirection.Up))
-           
         return insights
     
     def OnSecuritiesChanged(self, algorithm, changes):
-
         for security in changes.AddedSecurities:
             symbol = security.Symbol
             newsAsset = algorithm.AddData(TiingoNews, symbol)
             self.newsData[symbol] = NewsData(newsAsset.Symbol)
-
         for security in changes.RemovedSecurities:
             newsData = self.newsData.pop(security.Symbol, None)
             if newsData is not None:
                 algorithm.RemoveSecurity(newsData.Symbol)
+                
