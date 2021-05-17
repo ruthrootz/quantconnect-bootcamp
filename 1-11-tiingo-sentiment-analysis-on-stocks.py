@@ -50,13 +50,16 @@ class NewsSentimentAlphaModel(AlphaModel):
                 if word in self.wordScores])
             
             #1. Get the underlying symbol and save to the variable symbol
-            symbol = news.Symbol.Underlying
+            symbol = article.Symbol.Underlying
             
             #2. Add scores to the rolling window associated with its newsData symbol
+            self.newsData[symbol].Window.Add(data)
             
             #3. Sum the rolling window scores, save to sentiment
             # If sentiment aggregate score for the time period is greater than 5, emit an up insight
-            sentiment = ...
+            sentiment = sum(Window)
+            if sentiment > 5:
+                insights.append(Insight.Price(symbol, timedelta(1), InsightDirection.Up))
            
         return insights
     
