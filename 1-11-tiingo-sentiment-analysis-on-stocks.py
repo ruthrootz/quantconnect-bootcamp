@@ -50,7 +50,7 @@ class NewsSentimentAlphaModel(AlphaModel):
                 if word in self.wordScores])
             
             #1. Get the underlying symbol and save to the variable symbol
-            symbol = data.Symbol.Underlying
+            symbol = self.Symbol.Underlying
             
             #2. Add scores to the rolling window associated with its newsData symbol
             self.newsData[symbol].Window.Add(data)
