@@ -45,7 +45,7 @@ class MySectorWeightingPortfolioConstructionModel(EqualWeightingPortfolioConstru
         for security in changes.AddedSecurities:
             #1. When new assets are added to the universe, save the Morningstar sector code 
             # for each security to the variable sectorCode
-            sectorCode = security.Fundamentals.AssetClassification
+            sectorCode = security.Fundamentals.AssetClassification.MorningstarSectorCode
             # 2. If the sectorCode is not in the self.symbolBySectorCode dictionary, create a new list 
             # and append the symbol to the list, keyed by sectorCode in the self.symbolBySectorCode dictionary 
             if sectorCode not in self.symbolBySectorCode:
