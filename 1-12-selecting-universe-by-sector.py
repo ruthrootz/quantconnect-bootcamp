@@ -39,28 +39,42 @@ class MySectorWeightingPortfolioConstructionModel(EqualWeightingPortfolioConstru
     def __init__(self, rebalance = Resolution.Daily):
         super().__init__(rebalance)
         self.symbolBySectorCode = dict()
+        self.result = dict()
+
+    def DetermineTargetPercent(self, activeInsights):
+        #1. Set the self.sectorBuyingPower before by dividing one by the length of self.symbolBySectorCode
+        self.sectorBuyingPower = 1 / len(self.symbolBySectorCode)
+            
+        for sector, symbols in self.symbolBySectorCode.items():
+            #2. Search for the active insights in this sector. Save the variable self.insightsInSector
+            for sector, symbols in self.dictionary.items():
+                self.insightsInSector = [insight for insight in activeInsights if insight.Symbol in symbols] 
+        
+            #3. Divide the self.sectorBuyingPower by the length of self.insightsInSector to calculate the variable percent
+            # The percent is the weight we'll assign the direction of the insight
+            self.percent = self.sectorBuyingPower / len(self.insightsInSector)
+        
+            #4. For each insight in self.insightsInSector, assign each insight an allocation. 
+            # The allocation is calculated by multiplying the insight direction by the self.percent 
+            for insight in self.insightsInSector:
+                self.result[insight] = insight.Direction * self.percent
+        return self.result
+
 
     def OnSecuritiesChanged(self, algorithm, changes):
-        
         for security in changes.AddedSecurities:
-            #1. When new assets are added to the universe, save the Morningstar sector code 
-            # for each security to the variable sectorCode
             sectorCode = security.Fundamentals.AssetClassification.MorningstarSectorCode
-            # 2. If the sectorCode is not in the self.symbolBySectorCode dictionary, create a new list 
-            # and append the symbol to the list, keyed by sectorCode in the self.symbolBySectorCode dictionary 
             if sectorCode not in self.symbolBySectorCode:
                 self.symbolBySectorCode[sectorCode] = list()
-            self.symbolBySectorCode[sectorCode].append(security.Symbol)
+            self.symbolBySectorCode[sectorCode].append(security.Symbol) 
+
         for security in changes.RemovedSecurities:
-            #3. For securities that are removed, save their Morningstar sector code to sectorCode
             sectorCode = security.Fundamentals.AssetClassification.MorningstarSectorCode
-            #4. If the sectorCode is in the self.symbolBySectorCode dictionary
             if sectorCode in self.symbolBySectorCode:
                 symbol = security.Symbol
-                # If the symbol is in the dictionary's sectorCode list;
-                if symbol in self.symbolBySectorCode[sectorCode]: 
-                    # Then remove the corresponding symbol from the dictionary
+                if symbol in self.symbolBySectorCode[sectorCode]:
                     self.symbolBySectorCode[sectorCode].remove(symbol)
-        # We use the super() function to avoid using the base class name explicity
+
         super().OnSecuritiesChanged(algorithm, changes)
+
 
