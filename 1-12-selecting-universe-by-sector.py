@@ -14,7 +14,7 @@ class SectorBalancedPortfolioConstruction(QCAlgorithm):
         self.SetUniverseSelection(MyUniverseSelectionModel())
         self.SetAlpha(ConstantAlphaModel(InsightType.Price, InsightDirection.Up, timedelta(1), 0.025, None))
         # 1. Set an instance of the MySectorWeightingPortfolioConstructionModel using self.SetPortfolioConstruction
-        self.SetProtfolioConstruction(MySectorWeightingPortfolioConstructionModel())
+        self.SetPortfolioConstruction(MySectorWeightingPortfolioConstructionModel())
         self.SetExecution(ImmediateExecutionModel())
 
 class MyUniverseSelectionModel(FundamentalUniverseSelectionModel):
