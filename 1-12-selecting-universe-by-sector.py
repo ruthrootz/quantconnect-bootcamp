@@ -3,6 +3,7 @@ from QuantConnect.Data.UniverseSelection import *
 from Selection.FundamentalUniverseSelectionModel import FundamentalUniverseSelectionModel
 from Portfolio.EqualWeightingPortfolioConstructionModel import EqualWeightingPortfolioConstructionModel
 
+
 class SectorBalancedPortfolioConstruction(QCAlgorithm):
 
     def Initialize(self):
@@ -15,6 +16,7 @@ class SectorBalancedPortfolioConstruction(QCAlgorithm):
         self.SetPortfolioConstruction(MySectorWeightingPortfolioConstructionModel(Resolution.Daily))
         self.SetExecution(ImmediateExecutionModel())
 
+        
 class MyUniverseSelectionModel(FundamentalUniverseSelectionModel):
 
     def __init__(self):
@@ -34,6 +36,7 @@ class MyUniverseSelectionModel(FundamentalUniverseSelectionModel):
         self.consumerDefensive = sorted(filtered, key=lambda f: f.MarketCap, reverse=True)[:1]
         return [x.Symbol for x in self.technology + self.financialServices + self.consumerDefensive]
         
+        
 class MySectorWeightingPortfolioConstructionModel(EqualWeightingPortfolioConstructionModel):
 
     def __init__(self, rebalance = Resolution.Daily):
@@ -42,23 +45,13 @@ class MySectorWeightingPortfolioConstructionModel(EqualWeightingPortfolioConstru
         self.result = dict()
 
     def DetermineTargetPercent(self, activeInsights):
-        #1. Set the self.sectorBuyingPower before by dividing one by the length of self.symbolBySectorCode
         self.sectorBuyingPower = 1 / len(self.symbolBySectorCode)
-            
         for sector, symbols in self.symbolBySectorCode.items():
-            #2. Search for the active insights in this sector. Save the variable self.insightsInSector
             self.insightsInSector = [insight for insight in activeInsights if insight.Symbol in symbols] 
-        
-            #3. Divide the self.sectorBuyingPower by the length of self.insightsInSector to calculate the variable percent
-            # The percent is the weight we'll assign the direction of the insight
             self.percent = self.sectorBuyingPower / len(self.insightsInSector)
-        
-            #4. For each insight in self.insightsInSector, assign each insight an allocation. 
-            # The allocation is calculated by multiplying the insight direction by the self.percent 
             for insight in self.insightsInSector:
                 self.result[insight] = insight.Direction * self.percent
         return self.result
-
 
     def OnSecuritiesChanged(self, algorithm, changes):
         for security in changes.AddedSecurities:
@@ -66,7 +59,6 @@ class MySectorWeightingPortfolioConstructionModel(EqualWeightingPortfolioConstru
             if sectorCode not in self.symbolBySectorCode:
                 self.symbolBySectorCode[sectorCode] = list()
             self.symbolBySectorCode[sectorCode].append(security.Symbol) 
-
         for security in changes.RemovedSecurities:
             sectorCode = security.Fundamentals.AssetClassification.MorningstarSectorCode
             if sectorCode in self.symbolBySectorCode:
@@ -75,5 +67,3 @@ class MySectorWeightingPortfolioConstructionModel(EqualWeightingPortfolioConstru
                     self.symbolBySectorCode[sectorCode].remove(symbol)
 
         super().OnSecuritiesChanged(algorithm, changes)
-
-
