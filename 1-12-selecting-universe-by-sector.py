@@ -1,4 +1,3 @@
-
 from datetime import timedelta
 from QuantConnect.Data.UniverseSelection import * 
 from Selection.FundamentalUniverseSelectionModel import FundamentalUniverseSelectionModel
@@ -32,8 +31,8 @@ class MyUniverseSelectionModel(FundamentalUniverseSelectionModel):
         self.technology = sorted(filtered, key=lambda f: f.MarketCap, reverse=True)[:3]
         #3. Save the top 2 securities sorted by MarketCap for the Financial Services sector to the variable self.financialServices
         filtered = [x for x in fine if x.AssetClassification.MorningstarSectorCode == MorningstarSectorCode.FinancialServices]
-        self.technology = sorted(filtered, key=lambda f: f.MarketCap, reverse=True)[:2]
+        self.financialServices = sorted(filtered, key=lambda f: f.MarketCap, reverse=True)[:2]
         #4. Save the top 1 securities sorted by MarketCap for the Consumer Goods sector to the variable self.consumerDefensive
         filtered = [x for x in fine if x.AssetClassification.MorningstarSectorCode == MorningstarSectorCode.ConsumerDefensive]
-        self.technology = sorted(filtered, key=lambda f: f.MarketCap, reverse=True)[:1]
+        self.consumerDefensive = sorted(filtered, key=lambda f: f.MarketCap, reverse=True)[:1]
         return [x.Symbol for x in self.technology + self.financialServices + self.consumerDefensive]
