@@ -47,8 +47,7 @@ class MySectorWeightingPortfolioConstructionModel(EqualWeightingPortfolioConstru
             
         for sector, symbols in self.symbolBySectorCode.items():
             #2. Search for the active insights in this sector. Save the variable self.insightsInSector
-            for sector, symbols in self.dictionary.items():
-                self.insightsInSector = [insight for insight in activeInsights if insight.Symbol in symbols] 
+            self.insightsInSector = [insight for insight in activeInsights if insight.Symbol in symbols] 
         
             #3. Divide the self.sectorBuyingPower by the length of self.insightsInSector to calculate the variable percent
             # The percent is the weight we'll assign the direction of the insight
