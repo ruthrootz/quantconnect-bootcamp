@@ -53,14 +53,14 @@ class MySectorWeightingPortfolioConstructionModel(EqualWeightingPortfolioConstru
             self.symbolBySectorCode[sectorCode].append(security.Symbol)
         for security in changes.RemovedSecurities:
             #3. For securities that are removed, save their Morningstar sector code to sectorCode
-            
+            sectorCode = security.Fundamentals.AssetClassification.MorningstarSectorCode
             #4. If the sectorCode is in the self.symbolBySectorCode dictionary
             if sectorCode in self.symbolBySectorCode:
                 symbol = security.Symbol
                 # If the symbol is in the dictionary's sectorCode list;
-                if symbol in sectorCode: 
+                if symbol in self.symbolBySectorCode[sectorCode]: 
                     # Then remove the corresponding symbol from the dictionary
-                    self.symbolBySectorCode.remove(symbol)
+                    self.symbolBySectorCode[sectorCode].remove(symbol)
         # We use the super() function to avoid using the base class name explicity
         super().OnSecuritiesChanged(algorithm, changes)
 
