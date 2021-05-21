@@ -26,7 +26,7 @@ class BasicTemplateFuturesAlgorithm(QCAlgorithm):
             if not self.Portfolio.Invested:
                 
                 #1. Save the notional value of the futures contract to self.notionalValue  
-                self.notionalValue = self.liquidContract.AskPrice * self.liquidContract.SymbolProperties.ContractMultiplier
+                self.notionalValue = self.liquidContract.AskPrice * self.gold.SymbolProperties.ContractMultiplier
                 
                 #2. Save the contract security object to the variable future
                 future = self.Securities[self.liquidContract.Symbol]
