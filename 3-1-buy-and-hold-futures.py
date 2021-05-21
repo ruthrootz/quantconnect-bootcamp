@@ -13,7 +13,7 @@ class BootCampTask(QCAlgorithm):
         for chain in slice.FutureChains:
             
             #1. Filter to choose popular contracts with OpenInterest > 1000
-            self.popularContracts = [x for x in chain if x.OpenInterest > 1000]
+            self.popularContracts = [x for x in chain.Value if x.OpenInterest > 1000]
             
             #2. If the length of contracts in this chain is zero, continue to the next chain
             if len(self.popularContracts) == 0:
