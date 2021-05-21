@@ -36,4 +36,4 @@ class BasicTemplateFuturesAlgorithm(QCAlgorithm):
                 self.contractsToBuy = floor(self.Portfolio.MarginRemaining / future.BuyingPowerModel.InitialOvernightMarginRequirement)
                 
                 #4. Make a market order for the number of contracts we calculated for that symbol
-                self.MarketOrder(liquidContract.Symbol, self.contractsToBuy)
+                self.MarketOrder(self.liquidContract.Symbol, self.contractsToBuy)
