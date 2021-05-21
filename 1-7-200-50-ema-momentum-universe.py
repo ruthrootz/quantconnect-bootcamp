@@ -28,6 +28,7 @@ class EMAMomentumUniverse(QCAlgorithm):
         for security in changes.AddedSecurities:
             self.SetHoldings(security.Symbol, 0.10)
             
+            
 class SelectionData():
     
     def __init__(self, history):
