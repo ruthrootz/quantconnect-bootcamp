@@ -17,7 +17,7 @@ class BootCampTask(QCAlgorithm):
             
             #2. If the length of contracts in this chain is zero, continue to the next chain
             if len(self.popularContracts) == 0:
-                break
+                continue
             
             #3. Sort our contracts by open interest in descending order and save to sortedByOIContracts
             sortedByOIContracts = sorted(self.popularContracts, key=lambda k : k.OpenInterest, reverse=True)
